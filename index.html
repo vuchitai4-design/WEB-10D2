@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trắc Nghiệm Công Nghệ - Python</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap');
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', sans-serif;
+        }
+
+        body {
+            background-color: #0f172a;
+            color: #f8fafc;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .quiz-container {
+            background: rgba(30, 41, 59, 0.7);
+            backdrop-filter: blur(10px);
+            border: 1px solid #334155;
+            border-radius: 20px;
+            padding: 40px;
+            max-width: 800px;
+            width: 100%;
+            box-shadow: 0 0 40px rgba(6, 182, 212, 0.1);
+            text-align: center;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #334155;
+        }
+
+        .score-board {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #06b6d4;
+        }
+
+        .question-text {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 30px;
+            line-height: 1.4;
+        }
+
+        .options-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .option-btn {
+            background: #1e293b;
+            color: #cbd5e1;
+            border: 2px solid #334155;
+            border-radius: 15px;
+            padding: 20px;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: left;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .option-btn:hover:not(:disabled) {
+            border-color: #06b6d4;
+            color: #fff;
+            box-shadow: 0 0 15px rgba(6, 182, 212, 0.3);
+            transform: translateY(-2px);
+        }
+
+        .option-btn:disabled {
+            cursor: not-allowed;
+        }
+
+        /* Hiệu ứng khi trả lời đúng */
+        .correct {
+            background: #059669 !important;
+            border-color: #10b981 !important;
+            color: white !important;
+            animation: jump 0.5s ease;
+            box-shadow: 0 0 20px rgba(16, 185, 129, 0.5);
+        }
+
+        /* Hiệu ứng khi trả lời sai */
+        .incorrect {
+            background: #e11d48 !important;
+            border-color: #f43f5e !important;
+            color: white !important;
+            animation: shake 0.5s ease;
+            box-shadow: 0 0 20px rgba(244, 63, 94, 0.5);
+        }
+
+        /* Nút chuyển câu hỏi */
+        #next-btn {
+            margin-top: 30px;
+            background: #06b6d4;
+            color: #fff;
+            border: none;
+            padding: 15px 40px;
+            font-size: 1.1rem;
+            border-radius: 12px;
+            cursor: pointer;
+            font-weight: 600;
+            display: none;
+            transition: all 0.3s ease;
+        }
+
+        #next-btn:hover {
+            background: #0891b2;
+            box-shadow: 0 0 15px rgba(6, 182, 212, 0.5);
+        }
+
+        /* Màn hình kết quả */
+        .result-screen {
+            display: none;
+        }
+        
+        .result-score {
+            font-size: 4rem;
+            color: #06b6d4;
+            font-weight: 800;
+            margin: 20px 0;
+            text-shadow: 0 0 20px rgba(6, 182, 212, 0.4);
+        }
+
+        .result-comment {
+            font-size: 1.3rem;
+            color: #cbd5e1;
+            margin-bottom: 30px;
+        }
+
+        #restart-btn {
+            background: #3b82f6;
+            color: #fff;
+            border: none;
+            padding: 15px 40px;
+            font-size: 1.1rem;
+            border-radius: 12px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        #restart-btn:hover {
+            background: #2563eb;
+            box-shadow: 0 0 15px rgba(59, 130, 246, 0.5);
+        }
+
+        @keyframes jump {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-15px); }
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            20%, 60% { transform: translateX(-10px); }
+            40%, 80% { transform: translateX(10px); }
+        }
+
+        /* Mobile Responsive */
+        @media (max-width: 600px) {
+            .options-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+        .glow-container {
+        margin-bottom: 20px;
+        text-align: center;
+    }
+
+    .glow-text {
+        font-size: 1.8rem;
+        font-weight: 800;
+        color: #fff;
+        text-transform: uppercase;
+        letter-spacing: 2px;
+        margin-top: -300px;
+        margin-right: -800px;
+        /* Hiệu ứng phát sáng xanh dương */
+        text-shadow: 
+            0 0 7px #00d2ff,
+            0 0 10px #00d2ff,
+            0 0 21px #00d2ff,
+            0 0 42px #0ea5e9,
+            0 0 82px #0ea5e9,
+            0 0 92px #0ea5e9;
+        animation: pulse 2s infinite alternate;
+    }
+
+    /* Hiệu ứng nhịp thở cho ánh sáng */
+    @keyframes pulse {
+        from {
+            opacity: 0.8;
+            transform: scale(0.98);
+        }
+        to {
+            opacity: 1;
+            transform: scale(1);
+        }
+    }
+    </style>
+</head>
+<body>
+
+    <div class="glow-container">
+        <h1 class="glow-text">Bài test sau khi nghe giảng đâyyy!!!</h1>
+    </div>
+    <div class="quiz-container">
+        <!-- Màn hình Câu hỏi -->
+        <div id="quiz-screen">
+            <div class="header">
+                <div class="question-count">Câu hỏi <span id="current-q">1</span>/10</div>
+                <div class="score-board">Điểm: <span id="score">0</span></div>
+            </div>
+            
+            <h2 class="question-text" id="question">Đang tải câu hỏi...</h2>
+            
+            <div class="options-grid" id="options">
+                <!-- Các nút đáp án sẽ được chèn bằng JS -->
+            </div>
+
+            <button id="next-btn" onclick="nextQuestion()">Tiếp tục ❯</button>
+        </div>
+
+        <!-- Màn hình Kết quả -->
+        <div class="result-screen" id="result-screen">
+            <h2>Hoàn thành bài kiểm tra!</h2>
+            <div class="result-score"><span id="final-score">0</span> / 10</div>
+            <div class="result-comment" id="result-comment">Nhận xét sẽ hiển thị ở đây.</div>
+            <button id="restart-btn" onclick="restartQuiz()">↻ Làm lại từ đầu</button>
+        </div>
+    </div>
+
+    <script>
+    const originalQuestions = [
+        {
+            question: "1. Python là ngôn ngữ lập trình có đặc điểm gì nổi bật?",
+            options: ["A. Bậc thấp và khó đọc", "B. Bậc cao, đa năng và dễ đọc", "C. Chỉ dùng để thiết kế giao diện web", "D. Chuyên dùng để viết hệ điều hành"],
+            correct: 1
+        },
+        {
+            question: "2. Ai là người đã tạo ra ngôn ngữ Python?",
+            options: ["A. Bill Gates", "B. Linus Torvalds", "C. Guido van Rossum", "D. Mark Zuckerberg"],
+            correct: 2
+        },
+        {
+            question: "3. Ngôn ngữ Python được ra mắt lần đầu tiên vào năm nào?",
+            options: ["A. 1989", "B. 1991", "C. 1995", "D. 2000"],
+            correct: 1
+        },
+        {
+            question: "4. Đâu là một điểm hạn chế lớn của Python?",
+            options: ["A. Cú pháp quá rườm rà", "B. Cộng đồng người dùng quá nhỏ", "C. Tốc độ chậm hơn các ngôn ngữ biên dịch", "D. Không thể kết nối với Cơ sở dữ liệu"],
+            correct: 2
+        },
+        {
+            question: "5. Python KHÔNG có thế mạnh trong lĩnh vực nào dưới đây so với Swift hay Kotlin?",
+            options: ["A. Trí tuệ nhân tạo (AI)", "B. Tự động hóa (Automation)", "C. Phân tích dữ liệu (Data Science)", "D. Phát triển ứng dụng Mobile"],
+            correct: 3
+        },
+        {
+            question: "6. Một AI/Machine Learning Engineer thường sử dụng các công cụ/thư viện nào đi kèm với Python?",
+            options: ["A. Django, Flask", "B. PyTorch, TensorFlow, Scikit-learn", "C. Pandas, SQL, Tableau", "D. Selenium, Pytest"],
+            correct: 1
+        },
+        {
+            question: "7. Nhiệm vụ chính của một Backend Developer sử dụng Python là gì?",
+            options: ["A. Xây dựng 'bộ não' cho các ứng dụng web và hệ thống API", "B. Phân tích dữ liệu và vẽ biểu đồ", "C. Viết code tự động đi tìm lỗi của người khác", "D. Thiết kế giao diện người dùng (UI)"],
+            correct: 0
+        },
+        {
+            question: "8. Công cụ nào sau đây thường được QA Automation Engineer sử dụng kết hợp với Python?",
+            options: ["A. AWS, Azure, Terraform", "B. Django, FastAPI", "C. Selenium, Pytest", "D. PowerBI"],
+            correct: 2
+        },
+        {
+            question: "9. Mức lương trung bình của một lập trình viên Python mới đi làm (Fresher/Junior) tại Việt Nam khoảng bao nhiêu?",
+            options: ["A. $300 – $500", "B. $500 – $800", "C. $900 – $1,300", "D. $2,800 – $4,500"],
+            correct: 2
+        },
+        {
+            question: "10. Tại thị trường Quốc tế, các vai trò AI Engineer hoặc Data Architect có thể đạt mức lương bao nhiêu một năm?",
+            options: ["A. $50,000 – $80,000", "B. $80,000 – $100,000", "C. $120,000 – $200,000", "D. Trên $500,000"],
+            correct: 2
+        }
+    ];
+
+    let questions = [];
+    let currentQIndex = 0;
+    let score = 0;
+    let canClick = true;
+
+    const questionEl = document.getElementById('question');
+    const optionsEl = document.getElementById('options');
+    const nextBtn = document.getElementById('next-btn');
+    const scoreEl = document.getElementById('score');
+    const currentQEl = document.getElementById('current-q');
+    const quizScreen = document.getElementById('quiz-screen');
+    const resultScreen = document.getElementById('result-screen');
+
+    // Hàm xáo trộn mảng (Fisher-Yates Shuffle)
+    function shuffleArray(array) {
+        for (let i = array.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [array[i], array[j]] = [array[j], array[i]];
+        }
+        return array;
+    }
+
+    function initQuiz() {
+        // Sao chép mảng gốc và xáo trộn câu hỏi
+        questions = shuffleArray([...originalQuestions]);
+        currentQIndex = 0;
+        score = 0;
+        scoreEl.innerText = score;
+        loadQuestion();
+    }
+
+    function loadQuestion() {
+        canClick = true;
+        nextBtn.style.display = 'none';
+        const currentQuestion = questions[currentQIndex];
+        
+        currentQEl.innerText = currentQIndex + 1;
+        // Bỏ số thứ tự cũ trong text để tránh bị loạn khi đảo
+        questionEl.innerText = currentQuestion.question.substring(currentQuestion.question.indexOf('.') + 1).trim();
+        optionsEl.innerHTML = '';
+
+        currentQuestion.options.forEach((option, index) => {
+            const button = document.createElement('button');
+            button.innerText = option;
+            button.classList.add('option-btn');
+            button.onclick = () => checkAnswer(button, index);
+            optionsEl.appendChild(button);
+        });
+    }
+
+    function checkAnswer(selectedButton, selectedIndex) {
+        if (!canClick) return;
+        canClick = false; 
+
+        const correctIndex = questions[currentQIndex].correct;
+        const allButtons = optionsEl.children;
+
+        for (let btn of allButtons) {
+            btn.disabled = true;
+        }
+
+        if (selectedIndex === correctIndex) {
+            selectedButton.classList.add('correct');
+            score++;
+            scoreEl.innerText = score;
+        } else {
+            selectedButton.classList.add('incorrect');
+            allButtons[correctIndex].classList.add('correct');
+        }
+
+        nextBtn.style.display = 'inline-block';
+    }
+
+    function nextQuestion() {
+        currentQIndex++;
+        if (currentQIndex < questions.length) {
+            loadQuestion();
+        } else {
+            showResult();
+        }
+    }
+
+    function showResult() {
+        quizScreen.style.display = 'none';
+        resultScreen.style.display = 'block';
+        document.getElementById('final-score').innerText = score;
+
+        const commentEl = document.getElementById('result-comment');
+        const comments = [
+            "Bậc thầy Python! Bạn sinh ra là để viết code!",
+            "Wow, phong độ của một Senior là đây!",
+            "Rất ấn tượng! Kiến thức của bạn cực kỳ vững chắc.",
+            "Tốt lắm! Chỉ cần mài giũa thêm chút nữa là hoàn hảo.",
+            "Khá khen! Bạn đã nắm được nền tảng cơ bản.",
+            "Đừng nản chí! Lỗi là mẹ thành công mà, hãy ôn lại nhé!",
+            "Oops! Có vẻ hôm nay hệ thống não bộ chưa load kịp."
+        ];
+
+        if (score === 10) commentEl.innerText = comments[0];
+        else if (score >= 8) commentEl.innerText = comments[Math.floor(Math.random() * 2) + 1];
+        else if (score >= 5) commentEl.innerText = comments[Math.floor(Math.random() * 2) + 3];
+        else commentEl.innerText = comments[Math.floor(Math.random() * 2) + 5];
+    }
+
+    function restartQuiz() {
+        quizScreen.style.display = 'block';
+        resultScreen.style.display = 'none';
+        initQuiz();
+    }
+
+    // Bắt đầu
+    initQuiz();
+</script>
+</body>
+</html>
